@@ -1,8 +1,8 @@
 import os
+import json
 import requests
 
-# 깃허브 Secrets에서 키값 불러오기
-REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
+# 깃허브 Secrets에서 토큰 불러오기
 ACCESS_TOKEN = os.environ.get("KAKAO_ACCESS_TOKEN")
 
 def send_kakao_message(text):
@@ -11,9 +11,21 @@ def send_kakao_message(text):
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Content-Type": "application/x-www-form-urlencoded"
     }
-    data = {
-        "template_object": f'{{"object_type": "text", "text": "{text}", "link": {{"web_url": "https://naver.com"}}}}'
+    
+    # 카카오 규격에 맞는 안전한 JSON 템플릿 생성
+    template_payload = {
+        "object_type": "text",
+        "text": text,
+        "link": {
+            "web_url": "https://naver.com",
+            "mobile_web_url": "https://naver.com"
+        }
     }
+    
+    data = {
+        "template_object": json.dumps(template_payload)
+    }
+    
     res = requests.post(url, headers=headers, data=data)
     return res.json()
 
